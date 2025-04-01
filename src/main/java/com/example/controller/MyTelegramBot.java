@@ -63,7 +63,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
 
         String keyword = parts[1];
-        MessageCount count = messageCountRepository.findById(keyword)
+        MessageCount count = messageCountRepository.findByKeyword(keyword)
                 .orElse(MessageCount.builder().keyword(keyword).count(0L).build());
         count.setCount(count.getCount() + 1);
         messageCountRepository.save(count);
