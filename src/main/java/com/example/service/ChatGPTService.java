@@ -9,6 +9,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class ChatGPTService {
     private static final Logger logger = LoggerFactory.getLogger(ChatGPTService.class);
@@ -24,16 +28,20 @@ public class ChatGPTService {
 
     public String submit(String message) {
         try {
-            String url = buildUrl();
-            HttpEntity<String> entity = createRequestEntity(message);
+            String url = String.format("%s/deployments/%s/chat/completions?api-version=%s",
+                    botConfig.getChatgptUrl(),
+                    botConfig.getChatgptModel(),
+                    botConfig.getChatgptApiVersion());
+
+            HttpEntity<Map<String, Object>> request = createRequestEntity(message);
 
             logger.debug("Sending request to ChatGPT API with URL: {}", url);
-            logger.debug("Request headers: {}", entity.getHeaders());
+            logger.debug("Request headers: {}", request.getHeaders());
 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
-                    entity,
+                    request,
                     String.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
@@ -60,32 +68,20 @@ public class ChatGPTService {
         }
     }
 
-    private String buildUrl() {
-        return String.format("%s/deployments/%s/chat/completions?api-version=%s",
-                botConfig.getChatgptUrl(),
-                botConfig.getChatgptModel(),
-                botConfig.getChatgptApiVersion());
-    }
-
-    private HttpEntity<String> createRequestEntity(String message) {
+    private HttpEntity<Map<String, Object>> createRequestEntity(String message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("api-key", botConfig.getChatgptToken()); // This sets the API key in headers
 
-        String payload = String.format(
-                "{\"messages\": [{\"role\": \"user\", \"content\": \"%s\"}]}",
-                escapeJson(message));
+        Map<String, Object> payload = new HashMap<>();
+        Map<String, String> messageMap = new HashMap<>();
+
+        messageMap.put("role", "user");
+        messageMap.put("content", message);
+
+        payload.put("messages", List.of(messageMap));
 
         logger.debug("Request payload: {}", payload);
         return new HttpEntity<>(payload, headers);
-    }
-
-    private String escapeJson(String input) {
-        if (input == null) return "";
-        return input.replace("\"", "\\\"")
-                .replace("\\", "\\\\")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
     }
 }
