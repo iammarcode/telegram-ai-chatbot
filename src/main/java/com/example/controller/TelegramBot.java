@@ -1,8 +1,9 @@
-package com.example.service;
+package com.example.controller;
 
 import com.example.config.BotConfig;
 import com.example.entity.MessageCount;
 import com.example.repository.MessageCountRepository;
+import com.example.service.ChatGPTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
-public class TelegramBotService extends TelegramLongPollingBot {
-    private static final Logger logger = LoggerFactory.getLogger(TelegramBotService.class);
+public class TelegramBot extends TelegramLongPollingBot {
+    private static final Logger logger = LoggerFactory.getLogger(TelegramBot.class);
 
     @Autowired
     private BotConfig botConfig;
@@ -23,14 +24,15 @@ public class TelegramBotService extends TelegramLongPollingBot {
     @Autowired
     private MessageCountRepository messageCountRepository;
 
+    
     @Override
     public String getBotUsername() {
-        return "YourBotName";
+        return "marcochow_bot";
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.getToken();
+        return "7998784983:AAGwxaHQa0spzx2R606iRCc1F9Hl82RmCNU";
     }
 
     @Override
