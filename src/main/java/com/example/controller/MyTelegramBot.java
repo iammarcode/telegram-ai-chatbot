@@ -14,8 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
-    private static final Logger logger = LoggerFactory.getLogger(TelegramBot.class);
+public class MyTelegramBot extends TelegramLongPollingBot {
+    private static final Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
 
     @Autowired
     private BotConfig botConfig;
@@ -24,15 +24,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private MessageCountRepository messageCountRepository;
 
-    
     @Override
     public String getBotUsername() {
-        return "marcochow_bot";
+        return botConfig.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return "7998784983:AAGwxaHQa0spzx2R606iRCc1F9Hl82RmCNU";
+        return botConfig.getToken();
     }
 
     @Override

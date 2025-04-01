@@ -1,6 +1,9 @@
 package com.example.service;
 
 import com.example.config.BotConfig;
+import com.example.controller.MyTelegramBot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -9,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ChatGPTService {
+    private static final Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
     private final BotConfig botConfig;
     private final RestTemplate restTemplate;
 
@@ -34,6 +38,7 @@ public class ChatGPTService {
             // Simple parsing - in production, use proper JSON parsing
             return response != null ? response.split("\"content\":\"")[1].split("\"")[0] : "Error processing response";
         } catch (Exception e) {
+            logger.error("Error: " + e.getMessage());
             return "Error: " + e.getMessage();
         }
     }

@@ -14,7 +14,11 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BotConfig {
+    // bot
     private String token;
+    private String username;
+
+    // gpt
     private String chatgptUrl;
     private String chatgptModel;
     private String chatgptApiVersion;
