@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-set -e
+# Env
+cp .env.local .env
 
 # Stop and remove containers and volumes
 docker compose down -v
 
-docker compose up mysql -d
+docker compose up bot-db -d

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -e
+# Env
+cp .env.docker .env
 
 # Stop and remove containers and volumes
 docker compose down -v
