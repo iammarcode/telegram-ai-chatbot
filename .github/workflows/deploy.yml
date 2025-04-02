@@ -1,0 +1,104 @@
+name: Deploy Telegram Bot to ECS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/Dockerfile'
+      - '**/src/**'
+      - '**/pom.xml'
+      - '**/build.gradle'
+      - '**/package.json'
+
+env:
+  AWS_REGION: ap-east-1
+  ECR_REPOSITORY: telegram-bot
+  ECS_CLUSTER: telegram-bot-cluster
+  ECS_SERVICE: telegram-bot-service
+  TASK_DEFINITION: task-definition.template.json
+  CONTAINER_NAME: telegram-bot-container
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          role-session-name: GitHubActions-Deploy
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Download task definition template
+        run: |
+          aws s3 cp s3://${{ secrets.S3_CONFIG_BUCKET }}/$TASK_DEFINITION ./$TASK_DEFINITION || true
+          if [ ! -f ./$TASK_DEFINITION ]; then
+            echo "Using local task definition template"
+          fi
+
+      - name: Fill in the new image ID in the task definition template
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Replace environment variables in task definition
+        run: |
+          sed -i "s#\${TASK_EXECUTION_ROLE_ARN}#${{ secrets.TASK_EXECUTION_ROLE_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${TASK_ROLE_ARN}#${{ secrets.TASK_ROLE_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${DB_HOST}#${{ secrets.DB_HOST }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${DB_NAME}#${{ secrets.DB_NAME }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${DB_USERNAME}#${{ secrets.DB_USERNAME }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${DB_PASSWORD_SECRET_ARN}#${{ secrets.DB_PASSWORD_SECRET_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${TELEGRAM_TOKEN_SECRET_ARN}#${{ secrets.TELEGRAM_TOKEN_SECRET_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${TELEGRAM_USERNAME_SECRET_ARN}#${{ secrets.TELEGRAM_USERNAME_SECRET_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${CHATGPT_TOKEN_SECRET_ARN}#${{ secrets.CHATGPT_TOKEN_SECRET_ARN }}#g" ${{ steps.task-def.outputs.task-definition }}
+          sed -i "s#\${AWS_REGION}#${{ env.AWS_REGION }}#g" ${{ steps.task-def.outputs.task-definition }}
+
+      - name: Register ECS task definition
+        id: register-task
+        uses: aws-actions/amazon-ecs-register-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+
+      - name: Deploy to ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          task-definition: ${{ steps.register-task.outputs.task-definition-arn }}
+          wait-for-service-stability: true
+
+      - name: Save task definition as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: task-definition
+          path: ${{ steps.task-def.outputs.task-definition }}
