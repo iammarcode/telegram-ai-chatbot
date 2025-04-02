@@ -6,7 +6,6 @@ import com.example.repository.MessageCountRepository;
 import com.example.service.ChatGPTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -17,22 +16,24 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class MyTelegramBot extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
 
-    @Autowired
-    private BotConfig botConfig;
-    @Autowired
-    private ChatGPTService chatGPTService;
-    @Autowired
-    private MessageCountRepository messageCountRepository;
+    private final BotConfig botConfig;
+
+    private final ChatGPTService chatGPTService;
+
+    private final MessageCountRepository messageCountRepository;
+
+    public MyTelegramBot(BotConfig botConfig, ChatGPTService chatGPTService, MessageCountRepository messageCountRepository) {
+        super(botConfig.getToken());
+        this.botConfig = botConfig;
+        this.chatGPTService = chatGPTService;
+        this.messageCountRepository = messageCountRepository;
+    }
 
     @Override
     public String getBotUsername() {
         return botConfig.getUsername();
     }
 
-    @Override
-    public String getBotToken() {
-        return botConfig.getToken();
-    }
 
     @Override
     public void onUpdateReceived(Update update) {
