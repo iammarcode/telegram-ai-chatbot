@@ -1,15 +1,17 @@
 services:
   app:
     build: .
+    container_name: app-container
     ports:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - bot-db
+      - db
 
-  bot-db:
+  db:
     image: mysql:8.0
+    container_name: db-container
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=telegram_bot_db

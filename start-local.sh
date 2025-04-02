@@ -3,4 +3,4 @@
 # Stop and remove containers and volumes
 docker compose down -v
 
-docker compose up bot-db -d
+docker compose up db -d
