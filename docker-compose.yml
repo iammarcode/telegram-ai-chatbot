@@ -3,22 +3,18 @@ services:
     build: .
     ports:
       - "8080:8080"
-    env_file:
-      - .env
     environment:
-      - SPRING_PROFILES_ACTIVE={SPRING_PROFILES_ACTIVE}
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - bot-db
 
   bot-db:
     image: mysql:8.0
-    env_file:
-      - .env
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=telegram_bot_db
+      - MYSQL_USER=local
+      - MYSQL_PASSWORD=local
     ports:
       - "3306:3306"
     volumes:

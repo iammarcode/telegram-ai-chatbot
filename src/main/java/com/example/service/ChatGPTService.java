@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.config.BotConfig;
+import com.example.config.BotProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -16,12 +16,12 @@ import java.util.Map;
 @Service
 public class ChatGPTService {
     private static final Logger logger = LoggerFactory.getLogger(ChatGPTService.class);
-    private final BotConfig botConfig;
+    private final BotProperties botProperties;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public ChatGPTService(BotConfig botConfig) {
-        this.botConfig = botConfig;
+    public ChatGPTService(BotProperties botProperties) {
+        this.botProperties = botProperties;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
@@ -29,9 +29,9 @@ public class ChatGPTService {
     public String submit(String message) {
         try {
             String url = String.format("%s/deployments/%s/chat/completions?api-version=%s",
-                    botConfig.getChatgptUrl(),
-                    botConfig.getChatgptModel(),
-                    botConfig.getChatgptApiVersion());
+                    botProperties.getChatgptUrl(),
+                    botProperties.getChatgptModel(),
+                    botProperties.getChatgptApiVersion());
 
             HttpEntity<Map<String, Object>> request = createRequestEntity(message);
 
@@ -71,7 +71,7 @@ public class ChatGPTService {
     private HttpEntity<Map<String, Object>> createRequestEntity(String message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", botConfig.getChatgptToken()); // This sets the API key in headers
+        headers.set("api-key", botProperties.getChatgptToken()); // This sets the API key in headers
 
         Map<String, Object> payload = new HashMap<>();
         Map<String, String> messageMap = new HashMap<>();

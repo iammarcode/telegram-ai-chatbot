@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BotConfig {
+public class BotProperties {
     // bot
     private String token;
     private String username;
