@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.config.BotProperties;
+import com.example.config.ChatbotProperties;
 import com.example.entity.MessageCount;
 import com.example.repository.MessageCountRepository;
 import com.example.service.ChatGPTService;
@@ -16,22 +16,22 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class MyTelegramBot extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
 
-    private final BotProperties botProperties;
+    private final ChatbotProperties chatbotProperties;
 
     private final ChatGPTService chatGPTService;
 
     private final MessageCountRepository messageCountRepository;
 
-    public MyTelegramBot(BotProperties botProperties, ChatGPTService chatGPTService, MessageCountRepository messageCountRepository) {
-        super(botProperties.getToken());
-        this.botProperties = botProperties;
+    public MyTelegramBot(ChatbotProperties chatbotProperties, ChatGPTService chatGPTService, MessageCountRepository messageCountRepository) {
+        super(chatbotProperties.getTelegramToken());
+        this.chatbotProperties = chatbotProperties;
         this.chatGPTService = chatGPTService;
         this.messageCountRepository = messageCountRepository;
     }
 
     @Override
     public String getBotUsername() {
-        return botProperties.getUsername();
+        return chatbotProperties.getTelegramUsername();
     }
 
 

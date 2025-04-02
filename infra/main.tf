@@ -188,12 +188,12 @@ resource "aws_secretsmanager_secret" "db_password" {
   name = "telegram-bot/db-password"
 }
 
-resource "aws_secretsmanager_secret" "bot_token" {
-  name = "telegram-bot/bot-token"
+resource "aws_secretsmanager_secret" "telegram_token" {
+  name = "telegram-bot/telegram-token"
 }
 
-resource "aws_secretsmanager_secret" "bot_username" {
-  name = "telegram-bot/bot-username"
+resource "aws_secretsmanager_secret" "telegram_username" {
+  name = "telegram-bot/telegram-username"
 }
 
 resource "aws_secretsmanager_secret" "chatgpt_token" {
@@ -212,8 +212,8 @@ resource "aws_iam_policy" "secrets_access" {
         "secretsmanager:DescribeSecret"
       ]
       Resource = [
-        aws_secretsmanager_secret.bot_token.arn,
-        aws_secretsmanager_secret.bot_username.arn,
+        aws_secretsmanager_secret.telegram_token.arn,
+        aws_secretsmanager_secret.telegram_username.arn,
         aws_secretsmanager_secret.chatgpt_token.arn
       ]
     }]
@@ -257,12 +257,12 @@ resource "aws_ecs_task_definition" "telegram_bot" {
         valueFrom = aws_secretsmanager_secret.db_password.arn  # Changed this line
       },
       {
-        name      = "BOT_TOKEN",
-        valueFrom = aws_secretsmanager_secret.bot_token.arn
+        name      = "TELEGRAM_TOKEN",
+        valueFrom = aws_secretsmanager_secret.telegram_token.arn
       },
       {
-        name      = "BOT_USERNAME",
-        valueFrom = aws_secretsmanager_secret.bot_username.arn
+        name      = "TELEGRAM_USERNAME",
+        valueFrom = aws_secretsmanager_secret.telegram_username.arn
       },
       {
         name      = "CHATGPT_TOKEN",

@@ -16,7 +16,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Getter
 public class TelegramBotConfig {
     @Autowired
-    private BotProperties botProperties;
+    private ChatbotProperties chatbotProperties;
 
     @Autowired
     private ChatGPTService chatGPTService;
@@ -31,7 +31,7 @@ public class TelegramBotConfig {
 
     @Bean
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
-        MyTelegramBot myTelegramBot = new MyTelegramBot(botProperties, chatGPTService, messageCountRepository);
+        MyTelegramBot myTelegramBot = new MyTelegramBot(chatbotProperties, chatGPTService, messageCountRepository);
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         telegramBotsApi.registerBot(myTelegramBot);
         return telegramBotsApi;

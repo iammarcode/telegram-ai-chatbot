@@ -8,17 +8,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "bot")
+@ConfigurationProperties(prefix = "chatbot")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BotProperties {
-    // bot
-    private String token;
-    private String username;
+public class ChatbotProperties {
+    // telegram
+    private String telegramToken;
+    private String telegramUsername;
 
-    // gpt
+    // chatgpt
     private String chatgptUrl;
     private String chatgptModel;
     private String chatgptApiVersion;

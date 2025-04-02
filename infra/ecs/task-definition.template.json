@@ -53,12 +53,12 @@
           "valueFrom": "${DB_PASSWORD_SECRET_ARN}"
         },
         {
-          "name": "BOT_TOKEN",
-          "valueFrom": "${BOT_TOKEN_SECRET_ARN}"
+          "name": "TELEGRAM_TOKEN",
+          "valueFrom": "${TELEGRAM_TOKEN_SECRET_ARN}"
         },
         {
-          "name": "BOT_USERNAME",
-          "valueFrom": "${BOT_USERNAME_SECRET_ARN}"
+          "name": "TELEGRAM_USERNAME",
+          "valueFrom": "${TELEGRAM_USERNAME_SECRET_ARN}"
         },
         {
           "name": "CHATGPT_TOKEN",

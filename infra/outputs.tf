@@ -10,12 +10,12 @@ output "db_secret_arn" {
   value = aws_db_instance.telegram_bot_db.arn
 }
 
-output "bot_token_secret_arn" {
-  value = aws_secretsmanager_secret.bot_token.arn
+output "telegram_token_secret_arn" {
+  value = aws_secretsmanager_secret.telegram_token.arn
 }
 
-output "bot_username_secret_arn" {
-  value = aws_secretsmanager_secret.bot_username.arn
+output "telegram_username_secret_arn" {
+  value = aws_secretsmanager_secret.telegram_username.arn
 }
 
 output "chatgpt_token_secret_arn" {
