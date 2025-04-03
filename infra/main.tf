@@ -35,7 +35,7 @@ resource "aws_internet_gateway" "gw" {
 }
 
 resource "aws_subnet" "private" {
-  count             = length(var.private_subnets)
+  count = length(var.private_subnets)
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnets[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
@@ -45,7 +45,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_subnet" "public" {
-  count                   = length(var.public_subnets)
+  count = length(var.public_subnets)
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnets[count.index]
   availability_zone       = data.aws_availability_zones.available.names[count.index]
@@ -67,7 +67,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count          = length(var.public_subnets)
+  count = length(var.public_subnets)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
@@ -87,35 +87,35 @@ resource "aws_security_group" "rds" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
     security_groups = [aws_security_group.ecs.id]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 resource "aws_db_instance" "telegram_bot_db" {
-  identifier             = "telegram-bot-db"
-  engine                 = "mysql"
-  engine_version         = "8.0"
-  instance_class         = var.db_instance_class
-  allocated_storage      = 20
-  storage_type           = "gp2"
-  db_name                = "telegram_bot_db"
-  username               = var.db_username
-  password               = var.db_password
-  parameter_group_name   = "default.mysql8.0"
-  skip_final_snapshot    = true
+  identifier           = "telegram-bot-db"
+  engine               = "mysql"
+  engine_version       = "8.0"
+  instance_class       = var.db_instance_class
+  allocated_storage    = 20
+  storage_type         = "gp2"
+  db_name              = "telegram_bot_db"
+  username             = var.db_username
+  password             = var.db_password
+  parameter_group_name = "default.mysql8.0"
+  skip_final_snapshot  = true
   vpc_security_group_ids = [aws_security_group.rds.id]
-  db_subnet_group_name   = aws_db_subnet_group.default.name
-  publicly_accessible    = false
+  db_subnet_group_name = aws_db_subnet_group.default.name
+  publicly_accessible  = false
 }
 
 # ECS
@@ -125,16 +125,16 @@ resource "aws_security_group" "ecs" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -155,13 +155,15 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   name = "telegram-bot-ecs-task-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
       }
-    }]
+    ]
   })
 }
 
@@ -174,13 +176,15 @@ resource "aws_iam_role" "ecs_task_role" {
   name = "telegram-bot-ecs-task-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
       }
-    }]
+    ]
   })
 }
 
@@ -205,18 +209,20 @@ resource "aws_iam_policy" "secrets_access" {
   description = "Policy to access Telegram bot secrets"
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret"
-      ]
-      Resource = [
-        aws_secretsmanager_secret.telegram_token.arn,
-        aws_secretsmanager_secret.telegram_username.arn,
-        aws_secretsmanager_secret.chatgpt_token.arn
-      ]
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          aws_secretsmanager_secret.telegram_token.arn,
+          aws_secretsmanager_secret.telegram_username.arn,
+          aws_secretsmanager_secret.chatgpt_token.arn
+        ]
+      }
+    ]
   })
 }
 
@@ -225,59 +231,40 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_secrets" {
   policy_arn = aws_iam_policy.secrets_access.arn
 }
 
-resource "aws_ecs_task_definition" "telegram_bot" {
-  family                   = "telegram-bot"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = var.ecs_task_cpu
-  memory                   = var.ecs_task_memory
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
+# Template-based task definition
+locals {
+  task_definition_values = {
+    task_execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
+    task_role_arn                = aws_iam_role.ecs_task_role.arn
+    db_host                      = aws_db_instance.telegram_bot_db.address
+    db_name                      = aws_db_instance.telegram_bot_db.db_name
+    db_username                  = var.db_username
+    db_password_secret_arn       = aws_secretsmanager_secret.db_password.arn
+    telegram_token_secret_arn    = aws_secretsmanager_secret.telegram_token.arn
+    telegram_username_secret_arn = aws_secretsmanager_secret.telegram_username.arn
+    chatgpt_token_secret_arn     = aws_secretsmanager_secret.chatgpt_token.arn
+    aws_region                   = var.aws_region
+    image_url                    = "${aws_ecr_repository.telegram_bot.repository_url}:prod"
+  }
+}
 
-  container_definitions = jsonencode([{
-    name      = "telegram-bot-container"
-    image     = "${aws_ecr_repository.telegram_bot.repository_url}:latest"
-    essential = true
-    portMappings = [{
-      containerPort = 8080
-      hostPort      = 8080
-    }]
-    environment = [
-      { name = "SPRING_PROFILES_ACTIVE", value = "docker" },
-      { name = "DB_HOST", value = aws_db_instance.telegram_bot_db.address },
-      { name = "DB_NAME", value = aws_db_instance.telegram_bot_db.db_name },
-      { name = "DB_USERNAME", value = var.db_username },
-      { name = "CHATGPT_URL", value = "https://genai.hkbu.edu.hk/general/rest" },
-      { name = "CHATGPT_MODEL", value = "pt-4-o-mini" },
-      { name = "CHATGPT_API_VERSION", value = "2024-05-01-preview" }
-    ]
-    secrets = [
-      {
-        name      = "DB_PASSWORD",
-        valueFrom = aws_secretsmanager_secret.db_password.arn  # Changed this line
-      },
-      {
-        name      = "TELEGRAM_TOKEN",
-        valueFrom = aws_secretsmanager_secret.telegram_token.arn
-      },
-      {
-        name      = "TELEGRAM_USERNAME",
-        valueFrom = aws_secretsmanager_secret.telegram_username.arn
-      },
-      {
-        name      = "CHATGPT_TOKEN",
-        valueFrom = aws_secretsmanager_secret.chatgpt_token.arn
-      }
-    ]
-    logConfiguration = {
-      logDriver = "awslogs",
-      options = {
-        "awslogs-group"         = aws_cloudwatch_log_group.telegram_bot.name,
-        "awslogs-region"        = var.aws_region,
-        "awslogs-stream-prefix" = "ecs"
-      }
-    }
-  }])
+resource "local_file" "generated_task_definition" {
+  filename = "${path.module}/../generated-task-definition.json"
+  content = templatefile("${path.module}/task-definition.tftpl.json", local.task_definition_values)
+}
+
+resource "aws_ecs_task_definition" "telegram_bot" {
+  depends_on = [local_file.generated_task_definition]
+
+  family             = "telegram-bot"
+  network_mode       = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                = var.ecs_task_cpu
+  memory             = var.ecs_task_memory
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
+
+  container_definitions = file("${path.module}/../generated-task-definition.json")
 }
 
 resource "aws_ecs_service" "telegram_bot" {
@@ -289,7 +276,7 @@ resource "aws_ecs_service" "telegram_bot" {
 
   network_configuration {
     subnets          = aws_subnet.private[*].id
-    security_groups  = [aws_security_group.ecs.id]
+    security_groups = [aws_security_group.ecs.id]
     assign_public_ip = false
   }
 }

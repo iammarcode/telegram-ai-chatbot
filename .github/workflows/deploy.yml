@@ -16,7 +16,7 @@ env:
   ECR_REPOSITORY: telegram-bot
   ECS_CLUSTER: telegram-bot-cluster
   ECS_SERVICE: telegram-bot-service
-  TASK_DEFINITION: task-definition.template.json
+  TASK_DEFINITION: task-definition.tftpl.json
   CONTAINER_NAME: telegram-bot-container
 
 jobs:
