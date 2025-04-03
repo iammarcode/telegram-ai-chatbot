@@ -21,14 +21,14 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = {
+  tags                 = {
     Name = "telegram-bot-vpc"
   }
 }
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
-  tags = {
+  tags   = {
     Name = "telegram-bot-igw"
   }
 }
@@ -38,7 +38,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnets[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  tags = {
+  tags              = {
     Name = "telegram-bot-private-${count.index}"
   }
 }
@@ -49,14 +49,14 @@ resource "aws_subnet" "public" {
   cidr_block              = var.public_subnets[count.index]
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
-  tags = {
+  tags                    = {
     Name = "telegram-bot-public-${count.index}"
   }
 }
 
 resource "aws_eip" "nat" {
   count = length(var.public_subnets)
-  tags = {
+  tags  = {
     Name = "telegram-bot-nat-${count.index}"
   }
 }
@@ -65,7 +65,7 @@ resource "aws_nat_gateway" "nat" {
   count         = length(var.public_subnets)
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
-  tags = {
+  tags          = {
     Name = "telegram-bot-nat-${count.index}"
   }
   depends_on = [aws_internet_gateway.gw]
@@ -110,7 +110,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_db_subnet_group" "default" {
   name       = "telegram-bot-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
-  tags = {
+  tags       = {
     Name = "telegram-bot-db-subnet-group"
   }
 }
@@ -153,7 +153,7 @@ resource "aws_db_instance" "telegram_bot_db" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = aws_db_subnet_group.default.name
   publicly_accessible    = false
-  tags = {
+  tags                   = {
     Name = "telegram-bot-db"
   }
 }
@@ -195,13 +195,13 @@ resource "aws_ecs_cluster" "telegram_bot" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "telegram-bot-ecs-task-execution-role"
+  name               = "telegram-bot-ecs-task-execution-role"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
         Principal = {
           Service = "ecs-tasks.amazonaws.com"
         }
@@ -216,8 +216,8 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 resource "aws_iam_policy" "ecs_task_execution_policy" {
   name        = "telegram-bot-ecs-task-execution-policy"
   description = "Policy for ECS task execution role"
-  policy = jsonencode({
-    Version = "2012-10-17"
+  policy      = jsonencode({
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -242,13 +242,13 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_custom_policy" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "telegram-bot-ecs-task-role"
+  name               = "telegram-bot-ecs-task-role"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
         Principal = {
           Service = "ecs-tasks.amazonaws.com"
         }
@@ -261,9 +261,9 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 resource "aws_secretsmanager_secret" "db_password" {
-  name                   = "telegram-bot/db-password"
+  name                    = "telegram-bot/db-password"
   recovery_window_in_days = 0
-  tags = {
+  tags                    = {
     Name = "telegram-bot-db-password"
   }
 }
@@ -274,9 +274,9 @@ resource "aws_secretsmanager_secret_version" "db_password_version" {
 }
 
 resource "aws_secretsmanager_secret" "telegram_token" {
-  name                   = "telegram-bot/telegram-token"
+  name                    = "telegram-bot/telegram-token"
   recovery_window_in_days = 0
-  tags = {
+  tags                    = {
     Name = "telegram-bot-telegram-token"
   }
 }
@@ -287,9 +287,9 @@ resource "aws_secretsmanager_secret_version" "telegram_token_version" {
 }
 
 resource "aws_secretsmanager_secret" "telegram_username" {
-  name                   = "telegram-bot/telegram-username"
+  name                    = "telegram-bot/telegram-username"
   recovery_window_in_days = 0
-  tags = {
+  tags                    = {
     Name = "telegram-bot-telegram-username"
   }
 }
@@ -300,9 +300,9 @@ resource "aws_secretsmanager_secret_version" "telegram_username_version" {
 }
 
 resource "aws_secretsmanager_secret" "chatgpt_token" {
-  name                   = "telegram-bot/chatgpt-token"
+  name                    = "telegram-bot/chatgpt-token"
   recovery_window_in_days = 0
-  tags = {
+  tags                    = {
     Name = "telegram-bot-chatgpt-token"
   }
 }
@@ -315,8 +315,8 @@ resource "aws_secretsmanager_secret_version" "chatgpt_token_version" {
 resource "aws_iam_policy" "secrets_access" {
   name        = "telegram-bot-secrets-access"
   description = "Policy to access Telegram bot secrets"
-  policy = jsonencode({
-    Version = "2012-10-17"
+  policy      = jsonencode({
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -344,6 +344,7 @@ locals {
     task_execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn                = aws_iam_role.ecs_task_role.arn
     db_host                      = aws_db_instance.telegram_bot_db.address
+    db_port                      = aws_db_instance.telegram_bot_db.port
     db_name                      = aws_db_instance.telegram_bot_db.db_name
     db_username                  = var.db_username
     db_password_secret_arn       = aws_secretsmanager_secret.db_password.arn
@@ -384,7 +385,7 @@ resource "aws_ecs_service" "telegram_bot" {
 resource "aws_cloudwatch_log_group" "telegram_bot" {
   name              = "/ecs/telegram-bot"
   retention_in_days = 30
-  tags = {
+  tags              = {
     Name = "telegram-bot-logs"
   }
 }

@@ -3,6 +3,7 @@ output "task_definition_parameters" {
     task_execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn                = aws_iam_role.ecs_task_role.arn
     db_host                      = aws_db_instance.telegram_bot_db.address
+    db_port                      = aws_db_instance.telegram_bot_db.port
     db_name                      = aws_db_instance.telegram_bot_db.db_name
     db_username                  = var.db_username
     db_password_secret_arn       = aws_secretsmanager_secret.db_password.arn
