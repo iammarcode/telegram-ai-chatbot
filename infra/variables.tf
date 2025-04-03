@@ -20,6 +20,23 @@ variable "db_password" {
   }
 }
 
+variable "telegram_token" {
+  description = "Telegram bot token"
+  type        = string
+  sensitive   = true
+}
+
+variable "telegram_username" {
+  description = "Telegram bot username"
+  type        = string
+}
+
+variable "chatgpt_token" {
+  description = "ChatGPT API token"
+  type        = string
+  sensitive   = true
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC (e.g., 10.0.0.0/16)"
   type        = string

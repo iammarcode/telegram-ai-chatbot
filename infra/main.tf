@@ -249,7 +249,7 @@ resource "aws_secretsmanager_secret" "telegram_token" {
 
 resource "aws_secretsmanager_secret_version" "telegram_token_version" {
   secret_id     = aws_secretsmanager_secret.telegram_token.id
-  secret_string = "YOUR_TELEGRAM_TOKEN" # Replace with actual token
+  secret_string = var.telegram_token # Replace with actual token
 }
 
 resource "aws_secretsmanager_secret" "telegram_username" {
@@ -260,7 +260,7 @@ resource "aws_secretsmanager_secret" "telegram_username" {
 
 resource "aws_secretsmanager_secret_version" "telegram_username_version" {
   secret_id     = aws_secretsmanager_secret.telegram_username.id
-  secret_string = "YOUR_TELEGRAM_USERNAME" # Replace with actual username
+  secret_string = var.telegram_username
 }
 
 resource "aws_secretsmanager_secret" "chatgpt_token" {
@@ -271,7 +271,7 @@ resource "aws_secretsmanager_secret" "chatgpt_token" {
 
 resource "aws_secretsmanager_secret_version" "chatgpt_token_version" {
   secret_id     = aws_secretsmanager_secret.chatgpt_token.id
-  secret_string = "YOUR_CHATGPT_TOKEN" # Replace with actual token
+  secret_string = var.chatgpt_token
 }
 
 resource "aws_iam_policy" "secrets_access" {
