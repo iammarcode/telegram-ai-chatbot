@@ -328,7 +328,7 @@ resource "aws_ecs_task_definition" "telegram_bot" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
-  container_definitions = templatefile("${path.module}/container-definitions.tftpl.json", local.task_definition_values)
+  container_definitions = templatefile("${path.module}/task-definitions.tftpl.json", local.task_definition_values)
 }
 
 resource "aws_ecs_service" "telegram_bot" {
