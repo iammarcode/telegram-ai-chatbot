@@ -232,6 +232,7 @@ resource "aws_iam_role" "ecs_task_role" {
 
 resource "aws_secretsmanager_secret" "db_password" {
   name = "telegram-bot/db-password"
+  recovery_window_in_days = 0
   tags = merge(var.tags, { Name = "telegram-bot-db-password" })
 }
 
@@ -242,6 +243,7 @@ resource "aws_secretsmanager_secret_version" "db_password_version" {
 
 resource "aws_secretsmanager_secret" "telegram_token" {
   name = "telegram-bot/telegram-token"
+  recovery_window_in_days = 0
   tags = merge(var.tags, { Name = "telegram-bot-telegram-token" })
 }
 
@@ -252,6 +254,7 @@ resource "aws_secretsmanager_secret_version" "telegram_token_version" {
 
 resource "aws_secretsmanager_secret" "telegram_username" {
   name = "telegram-bot/telegram-username"
+  recovery_window_in_days = 0
   tags = merge(var.tags, { Name = "telegram-bot-telegram-username" })
 }
 
@@ -262,6 +265,7 @@ resource "aws_secretsmanager_secret_version" "telegram_username_version" {
 
 resource "aws_secretsmanager_secret" "chatgpt_token" {
   name = "telegram-bot/chatgpt-token"
+  recovery_window_in_days = 0
   tags = merge(var.tags, { Name = "telegram-bot-chatgpt-token" })
 }
 
