@@ -13,16 +13,10 @@
       "name": "telegram-bot-container",
       "image": "${image_url}",
       "essential": true,
-      "portMappings": [
-        {
-          "containerPort": 8080,
-          "hostPort": 8080
-        }
-      ],
       "environment": [
         {
           "name": "SPRING_PROFILES_ACTIVE",
-          "value": "docker"
+          "value": "prod"
         },
         {
           "name": "DB_HOST",

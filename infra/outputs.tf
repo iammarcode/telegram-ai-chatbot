@@ -18,7 +18,6 @@ output "task_definition_parameters" {
 output "ecr_repository_url" {
   value       = aws_ecr_repository.telegram_bot.repository_url
   description = "ECR repository URL for Docker images"
-  sensitive   = false
 }
 
 output "aws_region" {
@@ -27,7 +26,8 @@ output "aws_region" {
 }
 
 output "generated_task_definition_path" {
-  value = "${path.module}/../generated-task-definition.json"
+  value       = "${path.module}/../generated-task-definition.json"
+  description = "Path to the generated ECS task definition JSON"
 }
 
 output "docker_build_commands" {
@@ -41,5 +41,6 @@ To build and push Docker images:
 
 3. Push to ECR:
    docker push ${aws_ecr_repository.telegram_bot.repository_url}:prod
-  EOT
+EOT
+  description = "Commands to build and push Docker images to ECR"
 }

@@ -11,9 +11,13 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  description = "Database administrator password (8-41 chars, must contain 3 of: uppercase, lowercase, numbers, special chars except /@\" )"
+  description = "Database administrator password (8-41 chars, must contain 3 of: uppercase, lowercase, numbers, special chars except /@\")"
   type        = string
   sensitive   = true
+  validation {
+    condition     = length(var.db_password) >= 8 && length(var.db_password) <= 41
+    error_message = "Password must be 8-41 characters long."
+  }
 }
 
 variable "vpc_cidr" {
@@ -24,14 +28,14 @@ variable "vpc_cidr" {
 
 variable "private_subnets" {
   description = "CIDR blocks for private subnets (minimum 2 for high availability)"
-  type = list(string)
-  default = ["10.0.1.0/24", "10.0.2.0/24"]
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "public_subnets" {
   description = "CIDR blocks for public subnets (minimum 2 for high availability)"
-  type = list(string)
-  default = ["10.0.101.0/24", "10.0.102.0/24"]
+  type        = list(string)
+  default     = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 
 variable "db_instance_class" {
@@ -60,7 +64,7 @@ variable "environment" {
 
 variable "tags" {
   description = "Common tags for all resources"
-  type = map(string)
+  type        = map(string)
   default = {
     Project     = "TelegramBot"
     ManagedBy   = "Terraform"
