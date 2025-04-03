@@ -19,23 +19,3 @@ output "ecr_repository_url" {
   value       = aws_ecr_repository.telegram_bot.repository_url
   description = "ECR repository URL for Docker images"
 }
-
-output "aws_region" {
-  value       = var.aws_region
-  description = "AWS region being used"
-}
-
-output "docker_build_commands" {
-  value = <<EOT
-To build and push Docker images:
-1. Build production image:
-   docker build --target prod -t ${aws_ecr_repository.telegram_bot.repository_url}:prod .
-
-2. Login to ECR:
-   aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.telegram_bot.repository_url}
-
-3. Push to ECR:
-   docker push ${aws_ecr_repository.telegram_bot.repository_url}:prod
-EOT
-  description = "Commands to build and push Docker images to ECR"
-}
