@@ -14,6 +14,9 @@ target/
 .terraform.lock.hcl
 tfplan
 tfplan.*
+*.tfstate.*
+*.tfstate
+
 
 # Env files
 .env

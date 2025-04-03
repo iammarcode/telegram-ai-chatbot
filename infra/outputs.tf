@@ -25,11 +25,6 @@ output "aws_region" {
   description = "AWS region being used"
 }
 
-output "generated_task_definition_path" {
-  value       = "${path.module}/../generated-task-definition.json"
-  description = "Path to the generated ECS task definition JSON"
-}
-
 output "docker_build_commands" {
   value = <<EOT
 To build and push Docker images:

@@ -143,7 +143,6 @@ resource "aws_security_group" "ecs" {
   description = "Security group for ECS tasks"
   vpc_id      = aws_vpc.main.id
 
-  # No inbound rules needed since no REST API or webhook
   egress {
     from_port   = 0
     to_port     = 0
@@ -184,9 +183,33 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   tags = merge(var.tags, { Name = "telegram-bot-ecs-task-execution-role" })
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+resource "aws_iam_policy" "ecs_task_execution_policy" {
+  name        = "telegram-bot-ecs-task-execution-policy"
+  description = "Policy for ECS task execution role"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_custom_policy" {
   role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_arn = aws_iam_policy.ecs_task_execution_policy.arn
 }
 
 resource "aws_iam_role" "ecs_task_role" {
@@ -211,9 +234,19 @@ resource "aws_secretsmanager_secret" "db_password" {
   tags = merge(var.tags, { Name = "telegram-bot-db-password" })
 }
 
+resource "aws_secretsmanager_secret_version" "db_password_version" {
+  secret_id     = aws_secretsmanager_secret.db_password.id
+  secret_string = var.db_password
+}
+
 resource "aws_secretsmanager_secret" "telegram_token" {
   name = "telegram-bot/telegram-token"
   tags = merge(var.tags, { Name = "telegram-bot-telegram-token" })
+}
+
+resource "aws_secretsmanager_secret_version" "telegram_token_version" {
+  secret_id     = aws_secretsmanager_secret.telegram_token.id
+  secret_string = "YOUR_TELEGRAM_TOKEN" # Replace with actual token
 }
 
 resource "aws_secretsmanager_secret" "telegram_username" {
@@ -221,9 +254,19 @@ resource "aws_secretsmanager_secret" "telegram_username" {
   tags = merge(var.tags, { Name = "telegram-bot-telegram-username" })
 }
 
+resource "aws_secretsmanager_secret_version" "telegram_username_version" {
+  secret_id     = aws_secretsmanager_secret.telegram_username.id
+  secret_string = "YOUR_TELEGRAM_USERNAME" # Replace with actual username
+}
+
 resource "aws_secretsmanager_secret" "chatgpt_token" {
   name = "telegram-bot/chatgpt-token"
   tags = merge(var.tags, { Name = "telegram-bot-chatgpt-token" })
+}
+
+resource "aws_secretsmanager_secret_version" "chatgpt_token_version" {
+  secret_id     = aws_secretsmanager_secret.chatgpt_token.id
+  secret_string = "YOUR_CHATGPT_TOKEN" # Replace with actual token
 }
 
 resource "aws_iam_policy" "secrets_access" {
@@ -271,14 +314,7 @@ locals {
   }
 }
 
-resource "local_file" "generated_task_definition" {
-  filename = "${path.module}/../generated-task-definition.json"
-  content  = templatefile("${path.module}/task-definition.tftpl.json", local.task_definition_values)
-}
-
 resource "aws_ecs_task_definition" "telegram_bot" {
-  depends_on = [local_file.generated_task_definition]
-
   family                   = "telegram-bot"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -287,7 +323,7 @@ resource "aws_ecs_task_definition" "telegram_bot" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
-  container_definitions = file("${path.module}/../generated-task-definition.json")
+  container_definitions = templatefile("${path.module}/container-definitions.tftpl.json", local.task_definition_values)
 }
 
 resource "aws_ecs_service" "telegram_bot" {
