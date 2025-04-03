@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-# Stop and remove containers and volumes
 docker compose down -v
 
 # Rebuild
-docker-compose build --no-cache
+# docker-compose build --no-cache
 
 docker compose up -d
