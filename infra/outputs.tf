@@ -15,6 +15,17 @@ output "task_definition_parameters" {
   sensitive = true
 }
 
+output "ecr_repository_url" {
+  value       = aws_ecr_repository.telegram_bot.repository_url
+  description = "ECR repository URL for Docker images"
+  sensitive   = false
+}
+
+output "aws_region" {
+  value       = var.aws_region
+  description = "AWS region being used"
+}
+
 output "generated_task_definition_path" {
   value = "${path.module}/../generated-task-definition.json"
 }
