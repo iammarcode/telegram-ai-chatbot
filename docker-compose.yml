@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+      target: docker
     container_name: app-container
     ports:
       - "8080:8080"

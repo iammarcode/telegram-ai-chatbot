@@ -12,3 +12,14 @@ target/
 **/.terraform/*
 *.tfvars
 .terraform.lock.hcl
+tfplan
+tfplan.*
+*.tfstate.*
+*.tfstate
+
+
+# Env files
+.env
+
+# Temporary folder
+temp/
