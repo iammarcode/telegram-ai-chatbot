@@ -11,8 +11,7 @@ echo "2. Removing local Terraform files..."
 rm -rf \
   .terraform* \
   terraform.tfstate* \
-  tfplan \
-  generated-task-definition.json
+  tfplan
 
 # Delete AWS secrets
 echo "3. Cleaning up AWS secrets..."

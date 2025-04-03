@@ -22,7 +22,7 @@
       },
       {
         "name": "CHATGPT_MODEL",
-        "value": "pt-4-o-mini"
+        "value": "gpt-4-o-mini"
       },
       {
         "name": "CHATGPT_API_VERSION",
