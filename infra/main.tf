@@ -154,6 +154,7 @@ resource "aws_security_group" "ecs" {
 
 resource "aws_ecr_repository" "telegram_bot" {
   name                 = "telegram-bot"
+  force_delete         = true
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true
