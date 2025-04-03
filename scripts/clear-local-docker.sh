@@ -9,7 +9,7 @@ echo "----- Removing all Docker containers..."
 docker rm $(docker ps -aq)
 
 # Remove all images
-#echo "Removing all Docker images..."
+echo "Removing all Docker images..."
 docker rmi -f $(docker images -q)
 
 # Remove all volumes

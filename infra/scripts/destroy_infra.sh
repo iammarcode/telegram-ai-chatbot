@@ -2,18 +2,20 @@
 
 set -e
 
-terraform destroy
+# Destroy Terraform resources
+echo "1. Destroying Terraform resources..."
+terraform destroy -auto-approve
 
+# Remove local files
+echo "2. Removing local Terraform files..."
 rm -rf \
-  .terraform/ \
-  .terraform.lock.hcl \
-  terraform.tfstate \
-  terraform.tfstate.backup \
-  .terraform.tfstate.lock.info \
-  terraform.tfstate.*.backup \
-  generated-task-definition.json \
-  tfplan
+  .terraform* \
+  terraform.tfstate* \
+  tfplan \
+  generated-task-definition.json
 
+# Delete AWS secrets
+echo "3. Cleaning up AWS secrets..."
 aws secretsmanager delete-secret --secret-id telegram-bot/db-password --force-delete-without-recovery --region ap-east-1
 aws secretsmanager delete-secret --secret-id telegram-bot/telegram-token --force-delete-without-recovery --region ap-east-1
 aws secretsmanager delete-secret --secret-id telegram-bot/telegram-username --force-delete-without-recovery --region ap-east-1
