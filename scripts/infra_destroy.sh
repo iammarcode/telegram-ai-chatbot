@@ -8,7 +8,6 @@ INFRA_DIR="infra"
 REGION="ap-east-1"
 SECRET_PREFIX="telegram-bot"
 S3_BUCKET="ai-chat-bot-terraform-state"
-DYNAMODB_TABLE="terraform-locks"
 
 # Check infra directory
 [ ! -d "$INFRA_DIR" ] && { 
@@ -38,6 +37,5 @@ done
 echo "4. Cleaning up backend resources..."
 aws s3 rm "s3://${S3_BUCKET}/" --recursive --region ${REGION} || true
 aws s3api delete-bucket --bucket ${S3_BUCKET} --region ${REGION} || true
-aws dynamodb delete-table --table-name ${DYNAMODB_TABLE} --region ${REGION} || true
 
 echo "Cleanup completed."
