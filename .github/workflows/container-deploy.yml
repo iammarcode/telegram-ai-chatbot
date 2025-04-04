@@ -5,8 +5,9 @@ on:
     branches:
       - main
     paths:
-      - '**'
-      - '!infra/**'
+      - 'src/**'
+      - 'pom.xml'
+      - Dockerfile
   workflow_dispatch:
 
 env:
