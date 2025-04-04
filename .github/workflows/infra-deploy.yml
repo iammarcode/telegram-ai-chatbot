@@ -43,6 +43,9 @@ jobs:
           EOF
         working-directory: .
 
+      - name: Set script permissions
+        run: chmod +x ./scripts/infra_deploy.sh
+
       - name: Deploy Infrastructure
         run: ./scripts/infra_deploy.sh
         env:
