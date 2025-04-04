@@ -34,17 +34,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Start Docker Compose
-        run: docker-compose -f docker-compose.yml up --build -d
-        working-directory: .
-
       - name: Run Tests
         run: ./mvnw test
-        working-directory: .
-
-      - name: Stop Docker Compose
-        if: always()
-        run: docker-compose -f docker-compose.yml down
         working-directory: .
 
   deploy-container:
@@ -91,9 +82,4 @@ jobs:
         run: ./scripts/container_deploy.sh
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
-        working-directory: .
-
-      - name: Clean Docker
-        if: always()
-        run: ./scripts/docker_clear_all.sh || true
         working-directory: .
