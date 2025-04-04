@@ -78,6 +78,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set script permissions
+        run: chmod +x ./scripts/container-deploy.sh
+
       - name: Deploy Container
         run: ./scripts/container_deploy.sh
         env:
