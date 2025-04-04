@@ -1,0 +1,99 @@
+name: Deploy Container
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**'
+      - '!infra/**'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-east-1
+  JAVA_VERSION: 17
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Start Docker Compose
+        run: docker-compose -f docker-compose.yml up --build -d
+        working-directory: .
+
+      - name: Run Tests
+        run: ./mvnw test
+        working-directory: .
+
+      - name: Stop Docker Compose
+        if: always()
+        run: docker-compose -f docker-compose.yml down
+        working-directory: .
+
+  deploy-container:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Clean Maven Build
+        run: ./mvnw clean
+        working-directory: .
+
+      - name: Build Maven Project
+        run: ./mvnw package -DskipTests
+        working-directory: .
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Deploy Container
+        run: ./scripts/container_deploy.sh
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+        working-directory: .
+
+      - name: Clean Docker
+        if: always()
+        run: ./scripts/docker_clear_all.sh || true
+        working-directory: .
