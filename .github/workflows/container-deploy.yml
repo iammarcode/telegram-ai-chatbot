@@ -16,9 +16,44 @@ on:
 
 env:
   AWS_REGION: ap-east-1
+  JAVA_VERSION: 17
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Start Docker Compose
+        run: docker-compose -f docker-compose.yml up --build -d
+        working-directory: .
+
+      - name: Run Tests
+        run: ./mvnw test
+        working-directory: .
+
+      - name: Stop Docker Compose
+        if: always()
+        run: docker-compose -f docker-compose.yml down
+        working-directory: .
+
   deploy-container:
+    needs: test
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}
 
@@ -33,11 +68,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
       - name: Clean Maven Build
         run: ./mvnw clean
@@ -52,4 +95,9 @@ jobs:
 
       - name: Deploy Container
         run: ./scripts/container_deploy.sh
+        working-directory: .
+
+      - name: Clean Docker
+        if: always()
+        run: ./scripts/docker_clear_all.sh || true
         working-directory: .
