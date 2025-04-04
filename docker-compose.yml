@@ -1,23 +1,27 @@
-version: '3.8'
 services:
   app:
     build: .
+    image: chat-bot-image:latest
+    container_name: app-container
+    env_file:
+      - .env
     ports:
       - "8080:8080"
-    depends_on:
-      - mysql
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/telegram_bot_db
-      - SPRING_DATASOURCE_USERNAME=local
-      - SPRING_DATASOURCE_PASSWORD=local
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - db
 
-  mysql:
+  db:
     image: mysql:8.0
+    container_name: db-container
+    env_file:
+      - .env
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=telegram_bot_db
       - MYSQL_USER=local
       - MYSQL_PASSWORD=local
-      - MYSQL_DATABASE=telegram_bot_db
     ports:
       - "3306:3306"
     volumes:

@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.config.BotConfig;
+import com.example.config.ChatbotProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -16,12 +16,12 @@ import java.util.Map;
 @Service
 public class ChatGPTService {
     private static final Logger logger = LoggerFactory.getLogger(ChatGPTService.class);
-    private final BotConfig botConfig;
+    private final ChatbotProperties chatbotProperties;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public ChatGPTService(BotConfig botConfig) {
-        this.botConfig = botConfig;
+    public ChatGPTService(ChatbotProperties chatbotProperties) {
+        this.chatbotProperties = chatbotProperties;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
@@ -29,14 +29,14 @@ public class ChatGPTService {
     public String submit(String message) {
         try {
             String url = String.format("%s/deployments/%s/chat/completions?api-version=%s",
-                    botConfig.getChatgptUrl(),
-                    botConfig.getChatgptModel(),
-                    botConfig.getChatgptApiVersion());
+                    chatbotProperties.getChatgptUrl(),
+                    chatbotProperties.getChatgptModel(),
+                    chatbotProperties.getChatgptApiVersion());
 
             HttpEntity<Map<String, Object>> request = createRequestEntity(message);
 
-            logger.debug("Sending request to ChatGPT API with URL: {}", url);
-            logger.debug("Request headers: {}", request.getHeaders());
+            logger.debug("ai-chatbot - Sending request to ChatGPT API with URL: {}", url);
+            logger.debug("ai-chatbot - Request headers: {}", request.getHeaders());
 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
@@ -46,7 +46,7 @@ public class ChatGPTService {
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 String responseBody = response.getBody();
-                logger.debug("Received response: {}", responseBody);
+                logger.debug("ai-chatbot - Received response: {}", responseBody);
 
                 if (responseBody != null && responseBody.startsWith("{")) {
                     JsonNode root = objectMapper.readTree(responseBody);
@@ -55,15 +55,15 @@ public class ChatGPTService {
                             .path("content")
                             .asText();
                 } else {
-                    logger.error("Invalid response format: {}", responseBody);
+                    logger.error("ai-chatbot - Invalid response format: {}", responseBody);
                     return "Error: Invalid response format";
                 }
             } else {
-                logger.error("API request failed with status: {}", response.getStatusCode());
+                logger.error("ai-chatbot - API request failed with status: {}", response.getStatusCode());
                 return "Error: " + response.getStatusCode();
             }
         } catch (Exception e) {
-            logger.error("Error processing ChatGPT request", e);
+            logger.error("ai-chatbot - Error processing ChatGPT request", e);
             return "Error: " + e.getMessage();
         }
     }
@@ -71,7 +71,7 @@ public class ChatGPTService {
     private HttpEntity<Map<String, Object>> createRequestEntity(String message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", botConfig.getChatgptToken()); // This sets the API key in headers
+        headers.set("api-key", chatbotProperties.getChatgptToken()); // This sets the API key in headers
 
         Map<String, Object> payload = new HashMap<>();
         Map<String, String> messageMap = new HashMap<>();
@@ -81,7 +81,7 @@ public class ChatGPTService {
 
         payload.put("messages", List.of(messageMap));
 
-        logger.debug("Request payload: {}", payload);
+        logger.debug("ai-chatbot - Request payload: {}", payload);
         return new HttpEntity<>(payload, headers);
     }
 }

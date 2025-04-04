@@ -1,20 +1,24 @@
+# Build
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea
 *.iml
 
-### Ignore .DS_Store files ###
+# Ignore .DS_Store files
 .DS_Store
 
-### Docker tmp folder ###
-tmp/
+# Terraform
+**/.terraform/*
+*.tfvars
+.terraform.lock.hcl
+tfplan
+tfplan.*
+*.tfstate.*
+*.tfstate
 
-### Secrets Manager files ###
-secrets/
+# Env files
+.env
 
+# Temporary folder
 temp/
