@@ -7,7 +7,6 @@ set -e
 INFRA_DIR="infra"
 REGION="ap-east-1"
 SECRET_PREFIX="telegram-bot"
-S3_BUCKET="ai-chat-bot-terraform-state"
 
 # Check infra directory
 [ ! -d "$INFRA_DIR" ] && { 
@@ -32,10 +31,5 @@ for secret in db-password telegram-token telegram-username chatgpt-token; do
     --force-delete-without-recovery \
     --region ${REGION} || true
 done
-
-# Clean up backend resources (only if everything else succeeded)
-echo "4. Cleaning up backend resources..."
-aws s3 rm "s3://${S3_BUCKET}/" --recursive --region ${REGION} || true
-aws s3api delete-bucket --bucket ${S3_BUCKET} --region ${REGION} || true
 
 echo "Cleanup completed."
