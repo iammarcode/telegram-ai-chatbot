@@ -11,7 +11,7 @@ output "task_definition_parameters" {
     telegram_username_secret_arn = aws_secretsmanager_secret.telegram_username.arn
     chatgpt_token_secret_arn     = aws_secretsmanager_secret.chatgpt_token.arn
     aws_region                   = var.aws_region
-    image_url                    = "${aws_ecr_repository.telegram_bot.repository_url}:prod"
+    image_url                    = "${aws_ecr_repository.telegram_bot.repository_url}:${var.image_tag}"
   }
   sensitive = true
 }

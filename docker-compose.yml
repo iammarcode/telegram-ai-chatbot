@@ -1,9 +1,10 @@
 services:
   app:
-    build: 
-      context: .
-      target: docker
+    build: .
+    image: chat-bot-image:latest
     container_name: app-container
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     environment:
@@ -14,6 +15,8 @@ services:
   db:
     image: mysql:8.0
     container_name: db-container
+    env_file:
+      - .env
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=telegram_bot_db

@@ -72,3 +72,9 @@ variable "ecs_task_memory" {
   type        = number
   default     = 512
 }
+
+variable "image_tag" {
+  description = "tag of the image"
+  type        = string
+  default     = "latest"
+}
