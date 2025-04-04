@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '**'
-      - '!infra/**' # Exclude infra changes to avoid duplicate runs
+      - '!infra/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -23,11 +23,9 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'staging' }}
 
     steps:
-      # Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Set up AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -35,11 +33,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Set up Docker Buildx for multi-platform builds
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Clean Maven Build
+        run: ./mvnw clean
+        working-directory: .
+
+      - name: Build Maven Project
+        run: ./mvnw package -DskipTests
+        working-directory: .
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Run container deployment
       - name: Deploy Container
-        run: ./container_deploy.sh
+        run: ./scripts/container_deploy.sh
         working-directory: .

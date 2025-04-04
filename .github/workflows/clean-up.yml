@@ -18,11 +18,9 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'staging' }}
 
     steps:
-      # Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Set up AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -30,13 +28,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Install Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      # Run cleanup script
       - name: Destroy Infrastructure
-        run: ./infra_destroy.sh
+        run: ./scripts/infra_destroy.sh
         working-directory: .
