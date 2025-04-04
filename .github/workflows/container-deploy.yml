@@ -1,0 +1,45 @@
+name: Deploy Container
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**'
+      - '!infra/**' # Exclude infra changes to avoid duplicate runs
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (staging/production)'
+        required: true
+        default: 'staging'
+
+env:
+  AWS_REGION: ap-east-1
+
+jobs:
+  deploy-container:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      # Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Set up Docker Buildx for multi-platform builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Run container deployment
+      - name: Deploy Container
+        run: ./container_deploy.sh
+        working-directory: .

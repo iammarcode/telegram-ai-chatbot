@@ -1,0 +1,66 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (staging/production)'
+        required: true
+        default: 'staging'
+
+env:
+  AWS_REGION: ap-east-1
+  TF_VERSION: 1.5.7
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      # Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Install Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      # Create terraform.tfvars with secrets
+      - name: Create terraform.tfvars
+        run: |
+          cat <<EOF > infra/terraform.tfvars
+          db_username = "${{ secrets.DB_USERNAME }}"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          chatgpt_token = "${{ secrets.CHATGPT_TOKEN }}"
+          telegram_token = "${{ secrets.TELEGRAM_TOKEN }}"
+          telegram_username = "${{ secrets.TELEGRAM_USERNAME }}"
+          EOF
+        working-directory: .
+
+      # Run infrastructure deployment
+      - name: Deploy Infrastructure
+        run: ./infra_deploy.sh
+        working-directory: .
+
+      # Clean up sensitive files
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f infra/terraform.tfvars
+        working-directory: .
