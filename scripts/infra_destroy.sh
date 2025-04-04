@@ -1,28 +1,35 @@
 #!/usr/bin/env bash
+# infra_destroy.sh
 
 set -e
 
-# Check and rn in the infra folder
-if [ ! -d "infra" ]; then
-  echo "Error: 'infra' folder not found. Exiting..."
-  exit 1
-fi
-cd infra
+# Variables
+INFRA_DIR="infra"
+REGION="ap-east-1"
+SECRET_PREFIX="telegram-bot"
 
-# Destroy Terraform resources
-echo "1. Destroying Terraform resources..."
+# Check infra directory
+[ ! -d "$INFRA_DIR" ] && { 
+  echo "ERROR: 'infra' folder not found"; 
+  exit 1;
+}
+cd "$INFRA_DIR"
+
+# Terraform destroy
+echo "1. Destroying resources..."
 terraform destroy -auto-approve
 
-# Remove local files
-echo "2. Removing local Terraform files..."
-rm -rf \
-  .terraform* \
-  terraform.tfstate* \
-  tfplan
+# Clean local files
+echo "2. Cleaning local files..."
+rm -rf .terraform* terraform.tfstate* tfplan
 
-# Delete AWS secrets
-echo "3. Cleaning up AWS secrets..."
-aws secretsmanager delete-secret --secret-id telegram-bot/db-password --force-delete-without-recovery --region ap-east-1
-aws secretsmanager delete-secret --secret-id telegram-bot/telegram-token --force-delete-without-recovery --region ap-east-1
-aws secretsmanager delete-secret --secret-id telegram-bot/telegram-username --force-delete-without-recovery --region ap-east-1
-aws secretsmanager delete-secret --secret-id telegram-bot/chatgpt-token --force-delete-without-recovery --region ap-east-1
+# Delete AWS secrets (AWS restore policy)
+echo "3. Removing secrets..."
+for secret in db-password telegram-token telegram-username chatgpt-token; do
+  aws secretsmanager delete-secret \
+    --secret-id "${SECRET_PREFIX}/${secret}" \
+    --force-delete-without-recovery \
+    --region ${REGION} || true
+done
+
+echo "Cleanup completed."
