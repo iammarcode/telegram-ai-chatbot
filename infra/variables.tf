@@ -5,13 +5,13 @@ variable "aws_region" {
 }
 
 variable "db_username" {
-  description = "Database administrator username (MySQL compatible)"
+  description = "Database administrator username"
   type        = string
   sensitive   = true
 }
 
 variable "db_password" {
-  description = "Database administrator password (8-41 chars, must contain 3 of: uppercase, lowercase, numbers, special chars except /@\")"
+  description = "Database administrator password (8-41 chars)"
   type        = string
   sensitive   = true
   validation {
@@ -38,53 +38,43 @@ variable "chatgpt_token" {
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for VPC (e.g., 10.0.0.0/16)"
+  description = "CIDR block for VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
 
 variable "private_subnets" {
-  description = "CIDR blocks for private subnets (minimum 2 for high availability)"
+  description = "CIDR blocks for private subnets"
   type        = list(string)
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "public_subnets" {
-  description = "CIDR blocks for public subnets (minimum 2 for high availability)"
+  description = "CIDR blocks for public subnets"
   type        = list(string)
   default     = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 
 variable "db_instance_class" {
-  description = "RDS instance class (db.t3.micro for dev, db.t3.medium for prod)"
+  description = "RDS instance class"
   type        = string
   default     = "db.t3.micro"
 }
 
 variable "ecs_task_cpu" {
-  description = "ECS task CPU units (1024 units = 1 vCPU)"
+  description = "ECS task CPU units"
   type        = number
   default     = 256
 }
 
 variable "ecs_task_memory" {
-  description = "ECS task memory in MiB (1024 MiB = 1 GB)"
+  description = "ECS task memory in MiB"
   type        = number
   default     = 512
 }
 
-variable "environment" {
-  description = "Deployment environment (dev/stage/prod)"
+variable "image_tag" {
+  description = "tag of the image"
   type        = string
-  default     = "dev"
-}
-
-variable "tags" {
-  description = "Common tags for all resources"
-  type        = map(string)
-  default = {
-    Project     = "TelegramBot"
-    ManagedBy   = "Terraform"
-    Environment = "dev"
-  }
+  default     = "latest"
 }

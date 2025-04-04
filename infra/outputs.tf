@@ -3,6 +3,7 @@ output "task_definition_parameters" {
     task_execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn                = aws_iam_role.ecs_task_role.arn
     db_host                      = aws_db_instance.telegram_bot_db.address
+    db_port                      = aws_db_instance.telegram_bot_db.port
     db_name                      = aws_db_instance.telegram_bot_db.db_name
     db_username                  = var.db_username
     db_password_secret_arn       = aws_secretsmanager_secret.db_password.arn
@@ -10,7 +11,7 @@ output "task_definition_parameters" {
     telegram_username_secret_arn = aws_secretsmanager_secret.telegram_username.arn
     chatgpt_token_secret_arn     = aws_secretsmanager_secret.chatgpt_token.arn
     aws_region                   = var.aws_region
-    image_url                    = "${aws_ecr_repository.telegram_bot.repository_url}:prod"
+    image_url                    = "${aws_ecr_repository.telegram_bot.repository_url}:${var.image_tag}"
   }
   sensitive = true
 }
@@ -18,24 +19,4 @@ output "task_definition_parameters" {
 output "ecr_repository_url" {
   value       = aws_ecr_repository.telegram_bot.repository_url
   description = "ECR repository URL for Docker images"
-}
-
-output "aws_region" {
-  value       = var.aws_region
-  description = "AWS region being used"
-}
-
-output "docker_build_commands" {
-  value = <<EOT
-To build and push Docker images:
-1. Build production image:
-   docker build --target prod -t ${aws_ecr_repository.telegram_bot.repository_url}:prod .
-
-2. Login to ECR:
-   aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.telegram_bot.repository_url}
-
-3. Push to ECR:
-   docker push ${aws_ecr_repository.telegram_bot.repository_url}:prod
-EOT
-  description = "Commands to build and push Docker images to ECR"
 }

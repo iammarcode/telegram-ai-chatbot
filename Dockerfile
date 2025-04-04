@@ -29,12 +29,5 @@ WORKDIR /app
 # Copy the Spring Boot layered JAR
 COPY --from=builder /workspace/app/target/*.jar app.jar
 
-# Production-specific JVM options and entrypoint
-# - Optimized JVM settings for production (e.g., memory, garbage collection)
-# - Use 'prod' Spring profile
-# - Optional: Add -XX:+UseContainerSupport for better container integration
-ENTRYPOINT ["java", \
-  "-Dspring.profiles.active=prod", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-jar", "app.jar"]
+# Production
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
