@@ -6,6 +6,12 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "s3" {
+    bucket = "ai-chat-bot-terraform-state"
+    key    = "ai-chatbot/terraform.tfstate"
+    region = "ap-east-1"
+    dynamodb_table = "terraform-locks"
+  }
 }
 
 provider "aws" {
