@@ -27,6 +27,9 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Set script permissions
+        run: chmod +x ./scripts/infra_destroy.sh
+
       - name: Destroy Infrastructure
         run: ./scripts/infra_destroy.sh
         env:
