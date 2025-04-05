@@ -47,7 +47,7 @@ terraform plan -out=tfplan || {
 }
 
 echo "5. Applying changes..."
-terraform apply tfplan || { 
+terraform apply -auto-approve tfplan || { 
   echo "ERROR: Apply failed"; 
   exit 1; 
 }
