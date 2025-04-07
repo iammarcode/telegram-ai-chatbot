@@ -2,12 +2,12 @@
 
 set -e
 
-#docker compose down -v
+cp .env.local .env
+
+docker compose down -v
 
 # Start mysql
 docker compose up db -d
-
-cp .env.local .env
 
 # Wait for MySQL to be ready
 echo "Waiting for MySQL to be ready..."
