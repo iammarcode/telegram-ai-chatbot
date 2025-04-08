@@ -61,18 +61,16 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_eip" "nat" {
-  count = length(var.public_subnets)
   tags = {
-    Name = "telegram-bot-nat-${count.index}"
+    Name = "telegram-bot-nat"
   }
 }
 
 resource "aws_nat_gateway" "nat" {
-  count = length(var.public_subnets)
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id
   tags = {
-    Name = "telegram-bot-nat-${count.index}"
+    Name = "telegram-bot-nat"
   }
   depends_on = [aws_internet_gateway.gw]
 }
@@ -95,21 +93,20 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
-  count = length(var.private_subnets)
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat[count.index].id
+    nat_gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
-    Name = "telegram-bot-private-rt-${count.index}"
+    Name = "telegram-bot-private-rt"
   }
 }
 
 resource "aws_route_table_association" "private" {
   count = length(var.private_subnets)
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
+  route_table_id = aws_route_table.private.id
 }
 
 # Database
