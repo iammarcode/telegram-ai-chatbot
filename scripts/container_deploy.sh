@@ -7,9 +7,9 @@ set -ex
 TAG="latest"
 MULTI_PLATFORM="linux/amd64,linux/arm64"
 REGION="ap-east-1"
-ECR_REPO_NAME="telegram-bot"
-CLUSTER_NAME="telegram-bot-cluster"
-SERVICE_NAME="telegram-bot-service"
+ECR_REPO_NAME="telegram-ai-chatbot"
+CLUSTER_NAME="telegram-ai-chatbot-cluster"
+SERVICE_NAME="telegram-ai-chatbot-service"
 
 # Get AWS account ID
 echo "1. Get AWS account ID..."

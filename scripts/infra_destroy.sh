@@ -6,7 +6,7 @@ set -e
 # Variables
 INFRA_DIR="infra"
 REGION="ap-east-1"
-SECRET_PREFIX="telegram-bot"
+SECRET_PREFIX="telegram-ai-chatbot"
 
 # Check infra directory
 [ ! -d "$INFRA_DIR" ] && { 

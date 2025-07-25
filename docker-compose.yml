@@ -1,8 +1,8 @@
 services:
   app:
     build: .
-    image: chat-bot-image:latest
-    container_name: app-container
+    image: telegram-ai-chatbot-image:latest
+    container_name: telegram-ai-chatbot-container
     env_file:
       - .env
     ports:
@@ -14,7 +14,7 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: db-container
+    container_name: telegram-ai-chatbot-db-container
     env_file:
       - .env
     environment:

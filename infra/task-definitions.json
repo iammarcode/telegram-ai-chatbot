@@ -1,6 +1,6 @@
 [
   {
-    "name": "telegram-bot-container",
+    "name": "telegram-ai-chatbot-container",
     "image": "${image_url}",
     "essential": true,
     "environment": [
@@ -54,7 +54,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/telegram-bot",
+        "awslogs-group": "/ecs/telegram-ai-chatbot",
         "awslogs-region": "${aws_region}",
         "awslogs-stream-prefix": "ecs"
       }

@@ -7,8 +7,8 @@ terraform {
     }
   }
   backend "s3" {
-    bucket  = "ai-chat-bot-terraform-state"
-    key     = "ai-chatbot/terraform.tfstate"
+    bucket  = "telegram-ai-chatbot-terraform-state"
+    key     = "telegram-ai-chatbot/terraform.tfstate"
     region  = "ap-east-1"
     encrypt = true
   }
@@ -28,14 +28,14 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "telegram-bot-vpc"
+    Name = "telegram-ai-chatbot-vpc"
   }
 }
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "telegram-bot-igw"
+    Name = "telegram-ai-chatbot-igw"
   }
 }
 
@@ -45,7 +45,7 @@ resource "aws_subnet" "private" {
   cidr_block        = var.private_subnets[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "telegram-bot-private-${count.index}"
+    Name = "telegram-ai-chatbot-private-${count.index}"
   }
 }
 
@@ -56,13 +56,13 @@ resource "aws_subnet" "public" {
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "telegram-bot-public-${count.index}"
+    Name = "telegram-ai-chatbot-public-${count.index}"
   }
 }
 
 resource "aws_eip" "nat" {
   tags = {
-    Name = "telegram-bot-nat"
+    Name = "telegram-ai-chatbot-nat"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
   tags = {
-    Name = "telegram-bot-nat"
+    Name = "telegram-ai-chatbot-nat"
   }
   depends_on = [aws_internet_gateway.gw]
 }
@@ -82,7 +82,7 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.gw.id
   }
   tags = {
-    Name = "telegram-bot-public-rt"
+    Name = "telegram-ai-chatbot-public-rt"
   }
 }
 
@@ -99,7 +99,7 @@ resource "aws_route_table" "private" {
     nat_gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
-    Name = "telegram-bot-private-rt"
+    Name = "telegram-ai-chatbot-private-rt"
   }
 }
 
@@ -111,15 +111,15 @@ resource "aws_route_table_association" "private" {
 
 # Database
 resource "aws_db_subnet_group" "default" {
-  name       = "telegram-bot-db-subnet-group"
+  name       = "telegram-ai-chatbot-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
   tags = {
-    Name = "telegram-bot-db-subnet-group"
+    Name = "telegram-ai-chatbot-db-subnet-group"
   }
 }
 
 resource "aws_security_group" "rds" {
-  name        = "telegram-bot-rds-sg"
+  name        = "telegram-ai-chatbot-rds-sg"
   description = "Allow inbound MySQL access from ECS"
   vpc_id      = aws_vpc.main.id
 
@@ -137,12 +137,12 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "telegram-bot-rds-sg"
+    Name = "telegram-ai-chatbot-rds-sg"
   }
 }
 
 resource "aws_db_instance" "telegram_bot_db" {
-  identifier           = "telegram-bot-db"
+  identifier           = "telegram-ai-chatbot-db"
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = var.db_instance_class
@@ -163,7 +163,7 @@ resource "aws_db_instance" "telegram_bot_db" {
 
 # ECS
 resource "aws_security_group" "ecs" {
-  name        = "telegram-bot-ecs-sg"
+  name        = "telegram-ai-chatbot-ecs-sg"
   description = "Security group for ECS tasks"
   vpc_id      = aws_vpc.main.id
 
@@ -174,31 +174,31 @@ resource "aws_security_group" "ecs" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "telegram-bot-ecs-sg"
+    Name = "telegram-ai-chatbot-ecs-sg"
   }
 }
 
 resource "aws_ecr_repository" "telegram_bot" {
-  name                 = "telegram-bot"
+  name                 = "telegram-ai-chatbot"
   force_delete         = true
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true
   }
   tags = {
-    Name = "telegram-bot-ecr"
+    Name = "telegram-ai-chatbot-ecr"
   }
 }
 
 resource "aws_ecs_cluster" "telegram_bot" {
-  name = "telegram-bot-cluster"
+  name = "telegram-ai-chatbot-cluster"
   tags = {
-    Name = "telegram-bot-cluster"
+    Name = "telegram-ai-chatbot-cluster"
   }
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "telegram-bot-ecs-task-execution-role"
+  name = "telegram-ai-chatbot-ecs-task-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -212,12 +212,12 @@ resource "aws_iam_role" "ecs_task_execution_role" {
     ]
   })
   tags = {
-    Name = "telegram-bot-ecs-task-execution-role"
+    Name = "telegram-ai-chatbot-ecs-task-execution-role"
   }
 }
 
 resource "aws_iam_policy" "ecs_task_execution_policy" {
-  name        = "telegram-bot-ecs-task-execution-policy"
+  name        = "telegram-ai-chatbot-ecs-task-execution-policy"
   description = "Policy for ECS task execution role"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -245,7 +245,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_custom_policy" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "telegram-bot-ecs-task-role"
+  name = "telegram-ai-chatbot-ecs-task-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -259,15 +259,15 @@ resource "aws_iam_role" "ecs_task_role" {
     ]
   })
   tags = {
-    Name = "telegram-bot-ecs-task-role"
+    Name = "telegram-ai-chatbot-ecs-task-role"
   }
 }
 
 resource "aws_secretsmanager_secret" "db_password" {
-  name                    = "telegram-bot/db-password"
+  name                    = "telegram-ai-chatbot/db-password"
   recovery_window_in_days = 0
   tags = {
-    Name = "telegram-bot-db-password"
+    Name = "telegram-ai-chatbot-db-password"
   }
 }
 
@@ -277,10 +277,10 @@ resource "aws_secretsmanager_secret_version" "db_password_version" {
 }
 
 resource "aws_secretsmanager_secret" "telegram_token" {
-  name                    = "telegram-bot/telegram-token"
+  name                    = "telegram-ai-chatbot/telegram-token"
   recovery_window_in_days = 0
   tags = {
-    Name = "telegram-bot-telegram-token"
+    Name = "telegram-ai-chatbot-telegram-token"
   }
 }
 
@@ -290,10 +290,10 @@ resource "aws_secretsmanager_secret_version" "telegram_token_version" {
 }
 
 resource "aws_secretsmanager_secret" "telegram_username" {
-  name                    = "telegram-bot/telegram-username"
+  name                    = "telegram-ai-chatbot/telegram-username"
   recovery_window_in_days = 0
   tags = {
-    Name = "telegram-bot-telegram-username"
+    Name = "telegram-ai-chatbot-telegram-username"
   }
 }
 
@@ -303,10 +303,10 @@ resource "aws_secretsmanager_secret_version" "telegram_username_version" {
 }
 
 resource "aws_secretsmanager_secret" "chatgpt_token" {
-  name                    = "telegram-bot/chatgpt-token"
+  name                    = "telegram-ai-chatbot/chatgpt-token"
   recovery_window_in_days = 0
   tags = {
-    Name = "telegram-bot-chatgpt-token"
+    Name = "telegram-ai-chatbot-chatgpt-token"
   }
 }
 
@@ -316,7 +316,7 @@ resource "aws_secretsmanager_secret_version" "chatgpt_token_version" {
 }
 
 resource "aws_iam_policy" "secrets_access" {
-  name        = "telegram-bot-secrets-access"
+  name        = "telegram-ai-chatbot-secrets-access"
   description = "Policy to access Telegram bot secrets"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -360,7 +360,7 @@ locals {
 }
 
 resource "aws_ecs_task_definition" "telegram_bot" {
-  family             = "telegram-bot"
+  family             = "telegram-ai-chatbot"
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                = var.ecs_task_cpu
@@ -372,7 +372,7 @@ resource "aws_ecs_task_definition" "telegram_bot" {
 }
 
 resource "aws_ecs_service" "telegram_bot" {
-  name            = "telegram-bot-service"
+  name            = "telegram-ai-chatbot-service"
   cluster         = aws_ecs_cluster.telegram_bot.id
   task_definition = aws_ecs_task_definition.telegram_bot.arn
   desired_count   = 1
@@ -386,9 +386,9 @@ resource "aws_ecs_service" "telegram_bot" {
 }
 
 resource "aws_cloudwatch_log_group" "telegram_bot" {
-  name              = "/ecs/telegram-bot"
+  name              = "/ecs/telegram-ai-chatbot"
   retention_in_days = 30
   tags = {
-    Name = "telegram-bot-logs"
+    Name = "telegram-ai-chatbot-logs"
   }
 }

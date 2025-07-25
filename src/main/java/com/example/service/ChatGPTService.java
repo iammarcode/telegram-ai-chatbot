@@ -35,8 +35,8 @@ public class ChatGPTService {
 
             HttpEntity<Map<String, Object>> request = createRequestEntity(message);
 
-            logger.debug("ai-chatbot - Sending request to ChatGPT API with URL: {}", url);
-            logger.debug("ai-chatbot - Request headers: {}", request.getHeaders());
+            logger.debug("telegram-ai-chatbot - Sending request to ChatGPT API with URL: {}", url);
+            logger.debug("telegram-ai-chatbot - Request headers: {}", request.getHeaders());
 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
@@ -46,7 +46,7 @@ public class ChatGPTService {
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 String responseBody = response.getBody();
-                logger.debug("ai-chatbot - Received response: {}", responseBody);
+                logger.debug("telegram-ai-chatbot - Received response: {}", responseBody);
 
                 if (responseBody != null && responseBody.startsWith("{")) {
                     JsonNode root = objectMapper.readTree(responseBody);
@@ -55,15 +55,15 @@ public class ChatGPTService {
                             .path("content")
                             .asText();
                 } else {
-                    logger.error("ai-chatbot - Invalid response format: {}", responseBody);
+                    logger.error("telegram-ai-chatbot - Invalid response format: {}", responseBody);
                     return "Error: Invalid response format";
                 }
             } else {
-                logger.error("ai-chatbot - API request failed with status: {}", response.getStatusCode());
+                logger.error("telegram-ai-chatbot - API request failed with status: {}", response.getStatusCode());
                 return "Error: " + response.getStatusCode();
             }
         } catch (Exception e) {
-            logger.error("ai-chatbot - Error processing ChatGPT request", e);
+            logger.error("telegram-ai-chatbot - Error processing ChatGPT request", e);
             return "Error: " + e.getMessage();
         }
     }
@@ -81,7 +81,7 @@ public class ChatGPTService {
 
         payload.put("messages", List.of(messageMap));
 
-        logger.debug("ai-chatbot - Request payload: {}", payload);
+        logger.debug("telegram-ai-chatbot - Request payload: {}", payload);
         return new HttpEntity<>(payload, headers);
     }
 }

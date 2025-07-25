@@ -2,7 +2,7 @@
 
 set -e
 
-IMAGE_NAME="chat-bot-image"
+IMAGE_NAME="telegram-ai-chatbot-image"
 TAG="latest"
 MULTI_PLATFORM="linux/amd64,linux/arm64"
 

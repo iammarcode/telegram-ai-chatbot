@@ -11,10 +11,10 @@
 
 
     <groupId>com.marco</groupId>
-    <artifactId>ai-chatbot</artifactId>
+    <artifactId>telegram-ai-chatbot</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
-    <name>ai-chatbot</name>
+    <name>telegram-ai-chatbot</name>
 
     <properties>
         <java.version>17</java.version>
